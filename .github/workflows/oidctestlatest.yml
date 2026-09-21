@@ -11,22 +11,9 @@ jobs:
   aws-authentication:
     runs-on: ubuntu-latest
     steps:
-      - name: Get OIDC token
-        id: oidc
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const token = await core.getIDToken('sts.amazonaws.com');
-            core.setOutput('token', token);
+      - name: Checkout
+        uses: actions/checkout@v3
 
-            permissions:
-  id-token: write
-  contents: read
-
-jobs:
-  aws-authentication:
-    runs-on: ubuntu-latest
-    steps:
       - name: Get OIDC token
         id: oidc
         uses: actions/github-script@v7
@@ -61,3 +48,13 @@ jobs:
           }, indent=2))
           PY
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+          role-session-name: githublink
+
+      - name: Test OIDC authentication
+        run: |
+          aws sts get-caller-identity
